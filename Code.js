@@ -1,5 +1,5 @@
 /*================================================================================================================*
-  Holiday Tracking by Sheetgo
+  Invoicing Solution by Sheetgo
   ================================================================================================================
   Version:      1.0.0
   Project Page: https://github.com/Sheetgo/supplier_system
@@ -70,24 +70,10 @@ function create_system() {
     moveFile(file, folder);
 
     // Create Invoice Spreadsheet & Form
-    ss_dashboard.toast("Creating Invoice Form & Spreadsheet...");
-    var file = DriveApp.getFileById(Files.Ss_Invoice_Database.id).makeCopy(Files.Ss_Invoice_Database.name, folder);
-    moveFile(file, folder);
-    Files.Ss_Invoice_Database.id = file.getId();
-    Files.Form_Invoice.id = FormApp.openByUrl(SpreadsheetApp.openById(Files.Ss_Invoice_Database.id).getFormUrl()).getId();
-    var formFile = DriveApp.getFileById(Files.Form_Invoice.id);
-    formFile.setName(Files.Form_Invoice.name);
-    moveFile(formFile, folder);
+    create_spreadsheet_and_form(Files.Ss_Invoice_Database, Files.Form_Invoice, folder, "Creating Invoice Form & Spreadsheet...");
 
     // Create Supplier Spreadsheet & Form
-    ss_dashboard.toast("Creating Supplier Form & Spreadsheet...");
-    var file = DriveApp.getFileById(Files.Ss_Supplier_Database.id).makeCopy(Files.Ss_Supplier_Database.name, folder);
-    moveFile(file, folder);
-    Files.Ss_Supplier_Database.id = file.getId();
-    Files.Form_Supplier.id = FormApp.openByUrl(SpreadsheetApp.openById(Files.Ss_Supplier_Database.id).getFormUrl()).getId();
-    var formFile = DriveApp.getFileById(Files.Form_Supplier.id);
-    formFile.setName(Files.Form_Supplier.name);
-    moveFile(formFile, folder);
+    create_spreadsheet_and_form(Files.Ss_Supplier_Database, Files.Form_Supplier, folder, "Creating Supplier Form & Spreadsheet...");
 
     // Record the Invoice Registration Form ID on Supliers Database Spreadsheet
     var spreadsheet = SpreadsheetApp.openById(Files.Ss_Supplier_Database.id).getSheetByName("Settings");
@@ -98,6 +84,32 @@ function create_system() {
 
     // Update menu
     onOpen();
+}   
+
+
+/**
+ * Create the spreadsheet from template, rename it and move it into the solution folder
+ * @param {JSON} spreadsheet Spreadsheet dic information 
+ * @param {JSON} form Form dic information 
+ * @param {Object} folder Folder object in Google Drive 
+ * @param {string} message Message to display to the user 
+ */
+function create_spreadsheet_and_form(spreadsheet, form, folder, message) {
+    SpreadsheetApp.getActiveSpreadsheet().toast(message);
+    
+    // Create a spreadsheet copy from the template and move it into the solution folder. 
+    // This process will also create a copy from the bounded Form
+    var file = DriveApp.getFileById(spreadsheet.id).makeCopy(spreadsheet.name, folder);
+    moveFile(file, folder);
+
+    // Set the spreadsheet id on the variable
+    spreadsheet.id = file.getId();
+
+    // Get the id information from the new Form created, rename the file and move it into the solution folder
+    form.id = FormApp.openByUrl(SpreadsheetApp.openById(spreadsheet.id).getFormUrl()).getId();
+    var formFile = DriveApp.getFileById(form.id);
+    formFile.setName(form.name); // Rename file
+    moveFile(formFile, folder);
 }
 
 
